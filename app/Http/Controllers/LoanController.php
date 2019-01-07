@@ -36,7 +36,11 @@ class LoanController extends Controller
             'arr_fee' => $request->arr_fee,
         ]);
 
-        return new LoanResource($loan);
+        return response()->json([
+            'status' => (bool)$loan,
+            'message' => $loan ? 'Loan created' : 'Error creating loan',
+            'data' => new LoanResource($loan),
+        ]);
     }
 
     /**
