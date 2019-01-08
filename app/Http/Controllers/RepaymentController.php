@@ -10,7 +10,7 @@ use App\Http\Resources\RepaymentResource;
 class RepaymentController extends Controller
 {
     public function store(Request $request, Loan $loan){
-        // check if currently authenticated user is the owner of the loan
+        // check if current authenticated user is the owner of the loan
         if ($request->user()->id !== $loan->user_id){
             return response()->json(['error' => 'You can only update your own loans.'], 403);
         }
@@ -29,7 +29,7 @@ class RepaymentController extends Controller
             }
             return new RepaymentResource($repay);
         }
-        return response()->json(['error' => 'Your loan status is not Accepted.'], 400);
+        return response()->json(['error' => 'Your loan status is not Accepted.'], 403);
     }
 
     public function __construct(){

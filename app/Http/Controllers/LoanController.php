@@ -53,7 +53,7 @@ class LoanController extends Controller
     {
         // check if currently authenticated user is the owner of the loan
         if ($request->user()->id !== $loan->user_id){
-            return response()->json(['error' => 'You can only see your own loans.'], 403);
+            return response()->json(['message' => 'You can only see your own loans.'], 403);
         }
         return new LoanResource($loan);
     }
@@ -69,12 +69,9 @@ class LoanController extends Controller
     {
         // check if currently authenticated user is the owner of the loan
         if ($request->user()->id !== $loan->user_id){
-            return response()->json(['error' => 'You can only edit your own loans.'], 403);
+            return response()->json(['message' => 'You can only edit your own loans.'], 403);
         }
 
-        if (isset($request->status)){
-            $loan->status = $request->status;
-        }
         if ($loan->status == 'Pending'){
             if (isset($request->amount)){
                 $loan->amount = $request->amount;
@@ -91,6 +88,13 @@ class LoanController extends Controller
             if (isset($request->interest_rate)){
                 $loan->interest_rate = $request->interest_rate;
             }
+        }
+        else {
+            return response()->json(['message' => 'Your loan status is not editable.', 'status' => $loan->status], 403);
+        }
+        
+        if (isset($request->status)){
+            $loan->status = $request->status;
         }
         
         // $loan->update(array_filter($request->all()));

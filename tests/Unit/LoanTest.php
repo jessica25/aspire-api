@@ -16,7 +16,7 @@ class LoanTest extends TestCase
      *
      * @return void
      */
-
+    
     /*
         test to create loan without authentication
         expected return 401 with message Unauthenticated.
@@ -85,15 +85,6 @@ class LoanTest extends TestCase
     }
 
     /*
-        test to get all loan with admin user
-        expected return 200 with collection of all Loan
-    */
-    public function testGetAllLoanWithAdmin()
-    {
-
-    }
-
-    /*
         test to get one loan for this user without authentication
         expected return 401 with message Unauthenticated.
     */
@@ -135,6 +126,25 @@ class LoanTest extends TestCase
         $response->assertStatus(404);
         $response->assertJson(['message' => 'No query results for model [App\\Loan].']);
     }
+    
+    /*
+        test to get one other's loan
+        expected return 403 with error You can only see your own loans.
+    */
+    public function testGetOneOtherLoanWithAuth()
+    {
+        $user1 = factory(User::class)->create();
+        $loan1 = factory(Loan::class)->create([
+            'user_id' => $user1->id,
+        ]);
+        $user2 = factory(User::class)->create();
+        $loan2 = factory(Loan::class)->create([
+            'user_id' => $user2->id,
+        ]);
+        $response = $this->actingAs($user1, 'api')->json('GET', '/api/loans/'.$loan2->id);
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'You can only see your own loans.']);
+    }
 
     /*
         test to update one exist loan for this user without authentication
@@ -149,13 +159,14 @@ class LoanTest extends TestCase
 
     /*
         test to update one exist loan for this user with authentication
-        expected return 200 with message Unauthenticated.
+        expected return 200 with correct data loan and user
     */
     public function testUpdateLoanWithAuth()
     {
         $user = factory(User::class)->create();
         $loan = factory(Loan::class)->create([
             'user_id' => $user->id,
+            'status' => 'Pending',
         ]);
         $response = $this->actingAs($user, 'api')->json('PATCH', '/api/loans/'.$loan->id);
         $response->assertStatus(200);
@@ -172,8 +183,70 @@ class LoanTest extends TestCase
     */
     public function testUpdateOtherLoanWithAuth()
     {
-        $response = $this->json('PATCH', '/api/loans/0');
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Unauthenticated.']);
+        $user1 = factory(User::class)->create();
+        $loan1 = factory(Loan::class)->create([
+            'user_id' => $user1->id,
+        ]);
+        $user2 = factory(User::class)->create();
+        $loan2 = factory(Loan::class)->create([
+            'user_id' => $user2->id,
+        ]);
+        $response = $this->actingAs($user1, 'api')->json('PATCH', '/api/loans/'.$loan2->id);
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'You can only edit your own loans.']);
+    }
+
+    /*
+        test to update one exist Accepted loan owned by this user with authentication
+        expected return 403 with error You can only edit your own loans.
+    */
+    public function testUpdateAcceptedLoanWithAuth()
+    {
+        $user = factory(User::class)->create();
+        $loan = factory(Loan::class)->create([
+            'user_id' => $user->id,
+            'status' => 'Accepted',
+        ]);
+        $response = $this->actingAs($user, 'api')->json('PATCH', '/api/loans/'.$loan->id);
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'Your loan status is not editable.']);
+    }
+
+    /*
+        test to update one exist Pending loan to Cancelled owned by this user with authentication
+        expected return 200 with Loan's details
+    */
+    public function testUpdateLoanToCancelledWithAuth()
+    {
+        $user = factory(User::class)->create();
+        $loan = factory(Loan::class)->create([
+            'user_id' => $user->id,
+        ]);
+        $payload = ['status' => 'Cancelled'];
+        $response = $this->actingAs($user, 'api')->json('PATCH', '/api/loans/'.$loan->id, $payload);
+        $response->assertStatus(200);
+        // exclude user_id in $loan
+        unset($loan{'user_id'});
+        $response->assertJson(['data' => $loan->toArray()]);
+    }
+
+    /*
+        test to update amount one exist Pending loan owned by this user with authentication
+        expected return 200 with Loan's details
+    */
+    public function testUpdateLoanDataWithAuth()
+    {
+        $user = factory(User::class)->create();
+        $loan = factory(Loan::class)->create([
+            'user_id' => $user->id,
+            'status' => 'Pending',
+        ]);
+        $payload = ['amount' => '100000'];
+        $response = $this->actingAs($user, 'api')->json('PATCH', '/api/loans/'.$loan->id, $payload);
+        $response->assertStatus(200);
+        // exclude user_id in $loan
+        unset($loan{'user_id'});
+        $loan['amount'] = '100000';
+        $response->assertJson(['data' => $loan->toArray()]);
     }
 }
