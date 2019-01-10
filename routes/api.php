@@ -21,4 +21,4 @@ Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
 Route::apiResource('loans','LoanController');
-Route::post('loans/{loan}/repay', 'RepaymentController@store');
+Route::post('repay/{loan}', 'RepaymentController@store');
