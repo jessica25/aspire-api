@@ -45,6 +45,7 @@ class LoginTest extends TestCase
     public function testLoginWithEmailPass()
     {
         $user = factory(User::class)->create([
+            'name' => 'John',
             'email' => 'john@example.com',
             'password' => bcrypt('secret'),
         ]);
@@ -54,14 +55,9 @@ class LoginTest extends TestCase
         $this->json('POST', '/api/login', $payload)
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'name',
-                    'email',
-                    'created_at',
-                    'updated_at',
-                    'api_token',
-                ],
+                    'access_token',
+                    'token_type',
+                    'expires_in',
             ]);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Http\Requests\UserStoreRequest;
 use Illuminate\Http\Request;
 use App\User;
 class AuthController extends Controller
@@ -10,8 +11,9 @@ class AuthController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register(Request $request)
+    public function register(UserStoreRequest $request)
     {
+        $validated = $request->validated();
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
