@@ -28,14 +28,14 @@ class LoginTest extends TestCase
 
     /*
         test to login without password
-        expected return 500 with message Undefined index: password
+        expected return 401 with error Unauthorized
     */
     public function testLoginWithoutPass()
     {
         $payload = ['email' => 'john@example.com'];
         $response = $this->json('POST','/api/login', $payload);
-        $response->assertStatus(500);
-        $response->assertJson(['message' => 'Undefined index: password']);
+        $response->assertStatus(401);
+        $response->assertJson(['error' => 'Unauthorized']);
     }
 
     /*

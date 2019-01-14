@@ -1,69 +1,81 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+# Mini Aspire API
 
-## About Laravel
+Mini Aspire API provides several tasks such as:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+- Register new user & Login
+- Create, get, update a loan
+- Get list of loans
+- Create repayment for a loan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Installation
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+Follow Laravel installation [here](https://laravel.com/docs/5.7/installation).
 
-## Learning Laravel
+Set up database by running this syntax in command prompt.
+```bash
+php artisan migrate
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+Test unit can be run all or by filter.
+```bash
+./vendor/bin/phpunit
+./vendor/bin/phpunit --filter LoginTest
+./vendor/bin/phpunit --filter LoanTest
+```
+## Tables
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+This API uses 3 tables to operate, Users Table, Loan Table and Repayments Table
+### Users Table
 
-## Laravel Sponsors
+Column Name | Data Type | Comment
+--------------| ------------| --------------
+id | increment |
+name | string | 
+email | string, unique |
+email_verfied_at | timestamp, nullable|
+password | string|
+type | string | ex : Common, Admin
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+### Loans Table
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
+Column Name | Data Type | Comment
+--------------| ------------| --------------
+id | increment |
+user_id | integer| one-to-many with User
+amount| double(8,2) | ex : 30000
+duration | integer | ex : 1,2,6
+repayment_freq | string | ex : Monthly
+interest_rate | double(4,2) | ex : 2.5
+arr_fee | double(4,2) | ex : 3
+status | string | ex: Pending, Accepted, Completed, Rejected, Cancelled 
 
-## Contributing
+### Repayments Table
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Column Name | Data Type | Comment
+--------------| ------------| --------------
+id | increment |
+user_id | integer | one-to-many with User
+loan_id | integer | one-to-many with Loan
+amount | double(8,2) | ex : 30000
 
-## Security Vulnerabilities
+## API Functions
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+No | URL | Type |  Parameters
+-----| ------------| -- |---------
+1 | http://homestead.test/api/register | POST | name: John <br> email: john@example.com <br> password: john
+2 | http://homestead.test/api/login | POST | email: john@example.com <br> password: john
+3 | http://homestead.test/api/loans | GET
+4 | http://homestead.test/api/loans/{loan} | GET | 
+5 | http://homestead.test/api/loans | POST | amount: 30000 <br> duration: 3 <br> repayment_freq: Monthly <br> interest_rate:2 <br> arr_fee:1
+6| http://homestead.test/api/loans/{loan} | PUT | status: Accepted <br> interest_rate: 2.5
+7| http://homestead.test/api/repay/{loan}| POST | amount: 10000
 
-## License
+## Assumption
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- User must login to create loan, get loan, create repayment
+- Default loan status = Pending
+- User able to create repayment if loan status = Accepted
+-  After loan fully repaid, function will set loan status = Completed
+- User must repay : amount + (interest_rate/100 * duration * amount)
+
